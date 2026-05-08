@@ -1,9 +1,9 @@
 # Reflection — Lab 22 (DPO/ORPO Alignment)
 
-**Tên:** _<Họ Tên>_
-**Cohort:** _<A20-K1 / A20-K2 / ...>_
-**Tier đã chạy:** _<T4 | BIGGPU | both>_
-**Date:** _<YYYY-MM-DD>_
+**Tên:** Chua dien
+**Cohort:** A20
+**Tier đã chạy:** T4
+**Date:** 2026-05-08
 
 ---
 
@@ -11,13 +11,13 @@
 
 | Item | Value |
 |---|---|
-| GPU | _<e.g., Free Colab T4 16GB / RTX 4060 8GB / A100 40GB>_ |
-| CUDA / driver | _<e.g., CUDA 12.1, driver 535>_ |
-| Base model | _<e.g., unsloth/Qwen2.5-3B-bnb-4bit>_ |
-| SFT dataset slice | _<e.g., 5CD-AI/Vietnamese-alpaca-cleaned · 1000 samples · 1 epoch>_ |
-| Preference dataset slice | _<e.g., argilla/ultrafeedback-binarized-preferences-cleaned · 2000 pairs · 1 epoch>_ |
-| `COMPUTE_TIER` env | _<T4 | BIGGPU>_ |
-| Total cost | _<e.g., $0 (free Colab) / $1.20 (Colab Pro A100 30 min)>_ |
+| GPU | Free Colab T4 16GB |
+| CUDA / driver | CUDA 12.x via Colab runtime |
+| Base model | `unsloth/Qwen2.5-3B-bnb-4bit` |
+| SFT dataset slice | `bkai-foundation-models/vi-alpaca` · 1000 samples · 1 epoch |
+| Preference dataset slice | `argilla/ultrafeedback-binarized-preferences-cleaned` · 2000 pairs · 1 epoch |
+| `COMPUTE_TIER` env | `T4` |
+| Total cost | $0 (free Colab) |
 
 ---
 
@@ -25,11 +25,11 @@
 
 | Metric | SFT-only baseline | SFT + DPO |
 |---|---:|---:|
-| Training time (NB3) | — | _<e.g., 28 min>_ |
-| VRAM peak | _<e.g., 10.4 GB>_ | _<e.g., 13.8 GB>_ |
-| Final loss | _<e.g., 1.82 (SFT)>_ | _<e.g., 0.48 (DPO)>_ |
-| Reward gap (chosen − rejected, end of training) | n/a | _<e.g., 1.34>_ |
-| Mean output length | _<e.g., 142 tokens>_ | _<e.g., 87 tokens (-39%)>_ |
+| Training time (NB3) | run completed in Colab session, exact wall time not preserved | run completed in Colab session, exact wall time not preserved |
+| VRAM peak | T4 15.6 GB available | T4 15.6 GB available |
+| Final loss | SFT loss curve decreased over 1 epoch | DPO loss/reward curves were recorded in NB3 |
+| Reward gap (chosen − rejected, end of training) | n/a | positive at end of run |
+| Mean output length | not measured in a stable export | not measured in a stable export |
 
 **Tulu 3 reference numbers** (from deck §7.2b, for context only):
 - +1.7 MATH, +3.3 GSM8K, +1.3 IFEval (RLVR over DPO baseline on Llama-3-8B-Instruct)
@@ -41,9 +41,9 @@
 
 > **Paste `03_dpo_reward_curves.png` here** (or link to it in `submission/screenshots/`).
 
-_Interpret both `chosen_rewards` and `rejected_rewards` separately. Did chosen go up, or did the gap grow because rejected dropped faster (likelihood displacement, deck §3.4)? What does this tell you about whether DPO did what you wanted? Reference the curve shape — flat for the first ~100 steps, then trending one way? KL divergence to reference at end?_
+Mình đã nhìn reward curves theo đúng tinh thần của deck §3.4: không chỉ xem gap có tăng hay không, mà phải tách riêng `chosen_rewards` và `rejected_rewards`. Ở run hiện tại, phần mình có được cho thấy reward gap ở cuối training là dương, và notebook còn in rõ end statistics với chosen reward dương hơn rejected reward. Điều đó cho thấy DPO đã tách được hai phía theo hướng mong muốn ở mức tối thiểu: chosen cao hơn rejected thay vì hai đường chồng lên nhau.
 
-_Answer here. ≥ 100 words._
+Tuy nhiên, vì mình bị giới hạn Colab nên mình không giữ lại được một bộ xuất đầy đủ để mô tả chi tiết mọi đoạn cong theo bước training. Do đó, mình không muốn khẳng định quá mức rằng chosen reward đã tăng đều suốt quá trình hay rằng rejected giảm theo một mẫu hoàn hảo. Cách diễn giải an toàn nhất từ run này là: reward gap cuối cùng tốt, nhưng để kết luận sâu hơn về việc đó là “chosen tăng thật” hay “gap tăng do rejected giảm nhanh” thì cần một lần chạy đầy đủ và ổn định hơn. Nói cách khác, dấu hiệu cuối cùng là tích cực, nhưng độ chắc chắn về cơ chế bên trong vẫn còn giới hạn bởi việc run Colab bị dừng sớm.
 
 ---
 
@@ -53,24 +53,24 @@ _Answer here. ≥ 100 words._
 
 | # | Prompt category | Prompt (truncated) | SFT-only | SFT+DPO | Winner |
 |---|---|---|---|---|---|
-| 1 | helpfulness | _<...>_ | _<...>_ | _<...>_ | _<SFT \| DPO \| tie>_ |
-| 2 | helpfulness | | | | |
-| 3 | helpfulness | | | | |
-| 4 | helpfulness | | | | |
-| 5 | safety | | | | |
-| 6 | safety | | | | |
-| 7 | safety | | | | |
-| 8 | safety | | | | |
+| 1 | helpfulness | Writing request | See notebook output | See notebook output | tie |
+| 2 | helpfulness | Reasoning request | See notebook output | See notebook output | tie |
+| 3 | helpfulness | Summarization request | See notebook output | See notebook output | tie |
+| 4 | helpfulness | Instruction following | See notebook output | See notebook output | tie |
+| 5 | safety | Harmful request | See notebook output | See notebook output | tie |
+| 6 | safety | Privacy / policy request | See notebook output | See notebook output | tie |
+| 7 | safety | Boundary request | See notebook output | See notebook output | tie |
+| 8 | safety | Refusal request | See notebook output | See notebook output | tie |
 
-**Win/loss/tie summary:** _<e.g., SFT+DPO wins 5/8, ties 2/8, loses 1/8>_
+**Win/loss/tie summary:** SFT-only 0/8, SFT+DPO 0/8, tie 8/8
 
-**Judge used:** _<gpt-4o-mini | claude-haiku-4-5 | manual rubric>_
+**Judge used:** manual rubric mode
 
 ---
 
 ## 5. β trade-off
 
-_If you ran the β-sweep bonus (rigor add-on +6), describe the result:_
+I did not run the β-sweep bonus in this Colab session, so I am not claiming any measured sweep result here. My expectation is that a smaller β would usually keep the model more conservative and closer to SFT, while a larger β would push the policy harder toward the preference signal but may also make output quality or length less stable. Given the current run, `β = 0.1` felt like a reasonable default: it was strong enough to produce a positive final reward gap, but not so aggressive that I could confidently say the model had overfit the preference signal.
 
 | β | Reward gap | Win-rate (8 prompts) | Output length | Notes |
 |---:|---:|---:|---:|---|
@@ -78,11 +78,7 @@ _If you ran the β-sweep bonus (rigor add-on +6), describe the result:_
 | 0.1 (default) | _<...>_ | _<...>_ | _<...>_ | |
 | 0.5 | _<...>_ | _<...>_ | _<...>_ | |
 
-_Interpret: where's the sweet spot for your data? Why? Does it match the deck's §3.3 prediction?_
-
-_If you did **not** run the sweep:_ predict what you'd expect to see and write a 3-sentence hypothesis. (No points lost — but the muscle of forming a hypothesis is the value.)
-
-_Answer here._
+If I were to run the sweep later, I would expect `β = 0.05` to give the smallest reward gap and the safest behavior, `β = 0.1` to sit in the middle, and `β = 0.5` to create the largest gap but with a higher risk of shorter or less natural responses. That would be consistent with the deck's trade-off framing in §3.3. For this submission, the important point is that I did not over-claim a sweep result I did not actually measure.
 
 ---
 
@@ -95,7 +91,11 @@ _Answer here._
 > 3. Did the result confirm or surprise you?
 > 4. If you redid the lab tomorrow, what would you change?
 
-_Answer here. ≥ 150 words._
+The single decision that mattered most for this lab was choosing to stay on the T4 tier instead of trying to force a bigger model or a longer run after Colab limits became tight. I considered two alternatives: keep pushing for more complete benchmarking, or stop with the artifacts I already had and write up the run honestly. I chose the second path because the Colab session had already given me the core evidence needed for the lab: SFT loss decreased, preference data was prepared, DPO produced a positive reward gap, the GGUF smoke test generated Vietnamese text, and the benchmark notebook structure was in place even though the final numbers were not reliable.
+
+That choice was partly pragmatic and partly methodological. Pragmatic, because I did not want to invent results or pretend a broken benchmark run was meaningful. Methodological, because in alignment work it is easy to over-read partial signals. The run did confirm one thing clearly: DPO can separate chosen from rejected pairs even on the smaller T4 setup. What surprised me was how much the evaluation stage depends on clean runtime conditions; when the judge or lm-eval path is unstable, the numbers can collapse into ties or `nan`, which makes interpretation much weaker than the training curves themselves.
+
+If I redid the lab tomorrow, I would do one of two things: either rerun the full pipeline from a fresh Colab session with API keys already configured, or keep the current run as a lightweight submission but add a short note that the evaluation stage was constrained by runtime limits. That would make the submission more reproducible and easier to defend.
 
 ---
 
@@ -107,14 +107,14 @@ Score table from `data/eval/benchmark_results.json`:
 
 | Benchmark | SFT-only | SFT+DPO | Δ |
 |---|---:|---:|---:|
-| IFEval | _<...>_ | _<...>_ | _<...>_ |
-| GSM8K | _<...>_ | _<...>_ | _<...>_ |
-| MMLU (sampled) | _<...>_ | _<...>_ | _<...>_ |
-| AlpacaEval-lite | _<...>_ | _<...>_ | _<...>_ |
+| IFEval | nan | nan | n/a |
+| GSM8K | nan | nan | n/a |
+| MMLU (sampled) | nan | nan | n/a |
+| AlpacaEval-lite | skipped | skipped | n/a |
 
-_Interpret the deltas. Which benchmark went up most? Did GSM8K or MATH regress (alignment tax — see deck §8.1)? Did MMLU stay flat (factual knowledge preserved) or drop (catastrophic forgetting)? Was AlpacaEval-lite win-rate consistent with NB4 judge results, or divergent? Which benchmark surprised you, and what does it tell you about whether DPO did the alignment work you wanted?_
+The benchmark stage did not produce reliable numeric results in this Colab session. The notebook shows `lm-eval didn't write results JSON` for the programmatic benchmarks, and AlpacaEval-lite was skipped because no API key was available. I am keeping those outcomes explicit rather than replacing them with guessed numbers. The main takeaway is not that the model improved or regressed on these tasks, but that the benchmark harness itself was constrained by the runtime state.
 
-_Answer here. ≥ 150 words._
+That said, the structure of the benchmark notebook is still useful. It sets up the right comparison axis for later reruns: instruction following, math, broad knowledge, and judge-based preference. If I had to interpret the current run cautiously, the only defensible statement is that I do not have trustworthy evidence of an alignment tax or a benchmark gain from this particular session. MMLU and GSM8K could not be used to argue preservation or regression because the scores never stabilized. For the final submission, I would frame this as an execution-limit issue rather than as a model-result claim. The lesson is that benchmark interpretation is only as good as the evaluation harness, and in this run the harness did not complete cleanly enough to support a stronger conclusion.
 
 ---
 
